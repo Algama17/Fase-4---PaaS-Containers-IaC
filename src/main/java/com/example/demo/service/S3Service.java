@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.example.demo.AwsProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.auth.credentials.*;
@@ -16,20 +16,18 @@ import java.nio.file.Path;
 public class S3Service {
 
     private final S3Client s3Client;
+    private final String bucketName;
 
-    @Value("${aws.bucket.name}")
-    private String bucketName;
-
-    public S3Service(
-        @Value("${aws.accessKeyId}") String accessKeyId,
-        @Value("${aws.secretAccessKey}") String secretAccessKey,
-        @Value("${aws.region}") String region
-    ) {
-        s3Client = S3Client.builder()
-            .region(Region.of(region))
+    public S3Service(AwsProperties awsProperties) {
+        this.bucketName = awsProperties.getBucketName();
+        this.s3Client = S3Client.builder()
+            .region(Region.of(awsProperties.getRegion()))
             .credentialsProvider(
                 StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(accessKeyId, secretAccessKey)
+                    AwsBasicCredentials.create(
+                        awsProperties.getAccessKeyId(),
+                        awsProperties.getSecretAccessKey()
+                    )
                 )
             )
             .build();
